@@ -3,7 +3,6 @@ const express = require('express');
 const fs = require('fs');
 const request = require('request');
 const cheerio = require('cheerio');
-
 // define the application
 const scrapp = express();
 
@@ -11,7 +10,8 @@ const scrapp = express();
 scrapp.get('/scrap', (req,res) => {
     // store the url of the page being scraped into a variable
     url='https://content.viaplay.fi/pcdash-fi/leffat/kaikki?blockId=20822ace006b61ea5811662ab365729e&partial=1&pageNumber=1&sort=recently_added' //viaplay
-    
+    url='http://www.imdb.com/title/tt1229340/'; //one imdb entry
+    console.log('Currently scraping the url: ' + url);//print the url that we are going to scrape
     // send request to the url and 
     request(url, (error, response, html) => {
         // check if no error has occurred and  a succesfull response was received
@@ -25,7 +25,6 @@ scrapp.get('/scrap', (req,res) => {
     });
 
 });
-
  
 // return the scraped 
 module.exports = scrapp;
