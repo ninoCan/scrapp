@@ -1,4 +1,4 @@
-#Python webscraper ScrApp
+# Python webscraper ScrApp
 
 ## Setting the virtual environment
 [**Source**](https://realpython.com/python-virtual-environments-a-primer )
@@ -23,8 +23,10 @@ We are going to use the `request` and `BeautifulSoup` packages which we can now 
 Following the [BeatifulSoup documentation](https://www.crummy.com/software/BeautifulSoup/bs4/doc/#id16 ), the best way to use it is through the use of a third party parser: [lxml](https://lxml.de ). Let us install it, as well:
 
    $ pip install lxml
+In order to communicate with the MySQL server we also need to install a [mysql/python connector](https://dev.mysql.com/doc/connector-python/en/connector-python-introduction.html )
 
-
+   $ pip install mysql-connector-python
+T
 ##The scraper
 
 Touched the `scrApp.py`, most of the comment are in-file.

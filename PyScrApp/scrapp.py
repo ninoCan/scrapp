@@ -55,7 +55,7 @@ def log_error(e):
 
 ##
 
-def hbo_scraper():
+def hbo_scraper(cnx,cursor):
     """
     Scraper from hbo_nordic
     """
@@ -64,6 +64,15 @@ def hbo_scraper():
     
     i=0 #counter to loop through the page
     flag = True #flag to control the page scraper loop
+
+    # define the mysql query
+    #query = ("")
+
+    add_movie=("INSERT INTO movie"
+               "(name, description)"
+               "VALUES (%s, ' ')")
+
+    #add_url =("INSERT INTO movie_streaming_service_selection")
 
     while flag:
         url = hbo_base + str(i)
@@ -74,9 +83,21 @@ def hbo_scraper():
 #            for title in elem.select('title'):
 #                print(title.text)
         for elem in content.select('item'):
-            print(elem.select('title').pop())#.text)
+            par = (elem.select('title').pop().text,)
+            if cursor.execute("SELECT name FROM movie WHERE name = %s", (par)) == None:
+                cursor.execute(add_movie,(par))
+                print("inserted")
+                #save insertion to database
+                cnx.commit()
+            else:
+                continue
+
+
         if content.select('errorCode'):
             flag = False
+
+        
+        
     return
 
 def viaplay_scraper():
@@ -84,34 +105,25 @@ def viaplay_scraper():
 
     return
 
+    
 def main():
     """
-    This is going to scrape from pages the entries for the database
+    This is going to connect to mysql database and scrape data from the various services
     """
-    
-    hbo_scraper()
-    #'https://content.viaplay.fi/pcdash-fi/leffat/kaikki?blockId=20822ace006b61ea5811662ab365729e&partial=1&pageNumber=1&sort=recently_added',#viaplay
-    #]
-    
+    print("connecting to the mysql local container")
+    cnx = mysql.connector.connect(user='admin', password='password', host='172.17.0.2', database='vondd')
+    print("initializing the cursor to the database")
+    cursor =  cnx.cursor(buffered=True)
 
-    #while flag:
-    #    url = hbo_base + str(i)
-    #    raw = simple_get(url) #get the raw page
-        #if raw[0] == 'html':
-        #    content = BeautifulSoup(raw[1], "lxml")
-        #elif raw[0]=='xml':
-        #    content = BeautifulSoup(raw[1], "lxml-xml")
-    #    i += 1
-    #    for elem in content.select('item'):
-    #        for title in elem.select('title'):
-    #            print(title.text)
-    #    print(i)
-    #    if content.select('errorCode'):
-    #        flag = False
+    print('Scraping data from the internet...')
+    hbo_scraper(cnx,cursor)
+    print('Scraping complete!')
+
+    print("closing database cursor")
+    cursor.close()
+    print("closing connection to database")
+    cnx.close()
     return
 
-
 if __name__ == "__main__":
-    print('Scraping data from the internet...')
     main()
-    print('Scraping complete!')
