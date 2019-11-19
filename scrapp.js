@@ -15,7 +15,9 @@ scrapp.get('/scrap', (req,res) => {
     // send request to the url and 
     request(url, (error, response, html) => {
         // check if no error has occurred and  a succesfull response was received
-        if (!error && response.statusCode == 200 ) {
+        // if (!error && response.statusCode == 200 ) {
+        if (!error) {
+
             // load the html page into the $ variable, see README.md 
             const $ = cheerio.load(html);
             
@@ -25,6 +27,10 @@ scrapp.get('/scrap', (req,res) => {
     });
 
 });
+
+//This should expose the port 8081
+scrapp.listen('8081')
+console.log('Scraper running');
  
 // return the scraped 
 module.exports = scrapp;
