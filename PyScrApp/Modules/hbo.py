@@ -1,3 +1,5 @@
+from .requests_soup import *
+from .mysql_functions import *
 from bs4 import BeautifulSoup
 import mysql.connector
 
@@ -10,9 +12,9 @@ def is_hbo_service_available(cnx, cursor, par):
     cursor.execute(query,(par))
     cursor.fetchall()
     if cursor.rows >= 1:
-        return False 
+        return True
     else:
-        return True 
+        return False 
         
 
 def hbo_scraper(cnx,cursor):
@@ -37,9 +39,10 @@ def hbo_scraper(cnx,cursor):
 
             if  is_title_year_in_db(cnx, cursor, par): #check if (title,year) is present in the mysql table 'movie'
                 if is_hbo_service_available:
+                    #print('need to add omdb_search')
                     continue # later add omdb_search
                 else:
-
+                    print("need to add url")
             else:
                 add_title_year_to_db(cnx, cursor, par)
                 
