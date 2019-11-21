@@ -54,6 +54,55 @@ def log_error(e):
     print(e)
 
 ##
+def add_title_year_to_db(cnx, cursor, par):
+    """ 
+    Add the title and year of a movie to mysql database
+    """
+    add_movie=("INSERT INTO movie"
+               "(name, year, description)"
+               "VALUES (%s, %s, ' ')")
+
+    cursor.execute(add_movie,(par))
+    print(par[0] + " ("+par[1]+") inserted")
+    #save insertion to database
+    cnx.commit()
+    return 
+
+def add_to_db(cnx, cursor, par):
+    """ 
+    Add the title of a movie to mysql database
+    """
+    add_movie=("INSERT INTO movie"
+               "(name, description)"
+               "VALUES (%s, ' ')")
+
+    cursor.execute(add_movie,(par))
+    print(par[0] + " inserted")
+    #save insertion to database
+    cnx.commit()
+    return 
+
+def is_title_year_in_db(cnx, cursor, par):
+    query = "SELECT movie.name FROM movie WHERE movie.name = %s AND movie.year = %s"
+    cursor.execute(query,(par))
+    cursor.fetchall()
+    if cursor.rowcount > 0 :
+        return True
+    else:
+        return False
+
+def is_hbo_service_available(cnx, cursor, par):
+    query = ('SELECT COUNT(*) AS "rows"'
+             'FROM movie_streaming_service_selection LEFT JOIN'
+             'movie ON movie.id = movie_streaming_service_selection.movie_id'
+             'WHERE movie.name = %s AND movie.year = %s')
+    cursor.execute(query,(par))
+    cursor.fetchall()
+    if cursor.rows >= 1:
+        return False 
+    else:
+        return True 
+        
 
 def hbo_scraper(cnx,cursor):
     """
@@ -65,40 +114,38 @@ def hbo_scraper(cnx,cursor):
     i=0 #counter to loop through the page
     flag = True #flag to control the page scraper loop
 
-    # define the mysql query
-    #query = ("")
-
-    add_movie=("INSERT INTO movie"
-               "(name, description)"
-               "VALUES (%s, ' ')")
-
-    #add_url =("INSERT INTO movie_streaming_service_selection")
-
     while flag:
         url = hbo_base + str(i)
         raw = simple_get(url) #get the raw page
         content = BeautifulSoup(raw[1], "lxml-xml") #parse the content with BS
-        i += 1
-#        for elem in content.select('item'):
-#            for title in elem.select('title'):
-#                print(title.text)
-        for elem in content.select('item'):
-            par = (elem.select('title').pop().text,)
-            if cursor.execute("SELECT name FROM movie WHERE name = %s", (par)) == None:
-                cursor.execute(add_movie,(par))
-                print("inserted")
-                #save insertion to database
-                cnx.commit()
+        i += 20        #moves the counter to next page
+
+        for elem in content.select('item'): #cycles the <item> elements in the page
+            #extract title and year from an item of the page
+            par = (elem.select('title').pop().text, elem.find('media:credit', role = "year").text)
+
+            if  is_title_year_in_db(cnx, cursor, par): #check if (title,year) is present in the mysql table 'movie'
+                if is_hbo_service_available:
+                    continue # later add omdb_search
+                else:
+
             else:
-                continue
-
-
+                add_title_year_to_db(cnx, cursor, par)
+                
         if content.select('errorCode'):
-            flag = False
-
-        
-        
+            flag = False        
     return
+
+def omdb_search(title,year):
+    with open("api.key",'r') as f:
+        key = f.readline()
+    url = 'http://www.omdbapi.com/?apikey=[' + key + ']&t=' + title.replace(" ","+") + '&r=xml'
+    request = simple_get(url)
+    content = BeautifulSoup(request,"lxml-xml")
+    print(content)
+
+    return
+
 
 def viaplay_scraper():
     vp_base='https://content.viaplay.fi/pcdash-fi/leffat/kaikki?blockId=20822ace006b61ea5811662ab365729e&partial=1&pageNumber=1&sort=recently_added'
@@ -118,6 +165,8 @@ def main():
     print('Scraping data from the internet...')
     hbo_scraper(cnx,cursor)
     print('Scraping complete!')
+
+
 
     print("closing database cursor")
     cursor.close()
