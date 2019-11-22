@@ -66,7 +66,7 @@ def hbo_scraper(cnx,cursor):
 
                 for genre in movie['genres']:
                     if not is_genre_in_database(cursor, genre):
-                        print("I got here")
+                        # print("I got here")
                         add_new_genre(cnx, cursor, genre)
                     add_genre_to_movie(cnx, cursor, get_movieId(cursor,movie), get_genreId(cursor, genre))
 

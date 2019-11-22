@@ -94,8 +94,8 @@ def is_genre_in_database(cursor, name):
     par = (name, )
     cursor.execute(query, (par))
     result = cursor.fetchall()
-    check = len(result) != 0
-    print("Result from genre-check is going to be: ", result, " and the check is going to be: ", check)
+    # check = len(result) != 0
+    # print("Result from genre-check is going to be: ", result, " and the check is going to be: ", check)
     if len(result) != 0:
         return True
     else: 
@@ -199,7 +199,7 @@ def get_genreId(cursor, name):
     params = (name,)
     cursor.execute(query, (params))
     result = cursor.fetchall()
-    print("For ", name, " we get ",result)
+    #print("For ", name, " we get ",result)
     if len(result) != 0:
         return result.pop()[0]
     else:
