@@ -4,15 +4,16 @@ from .omdb import *
 from bs4 import BeautifulSoup
 
 
-def is_hbo_service_available(cnx, cursor, par):
-    query = ('SELECT movie_streaming_service_selection.id AS "rows"'
-             'FROM movie_streaming_service_selection' 
-             'LEFT JOIN movie'
-             'ON movie.id = movie_streaming_service_selection.movie_id'
+def is_hbo_service_available(cursor, movie):
+    query = ('SELECT movie_streaming_service_selection.id AS "rows" '
+             'FROM movie_streaming_service_selection ' 
+             'LEFT JOIN movie '
+             'ON movie.id = movie_streaming_service_selection.movie_id '
              'WHERE movie.name = %s AND movie.year = %s')
-    cursor.execute(query,(par))
+    pars = (movie['title'], movie['year'])
+    cursor.execute(query, (pars))
     cursor.fetchall()
-    if cursor.rows >= 1:
+    if cursor.rowcount >= 1:
         return True
     else:
         return False 
@@ -42,27 +43,32 @@ def hbo_scraper(cnx,cursor):
                 elem.find('media:credit', role = "year").text, 
                 elem.find('guid').text
             )
+            print("Scraped ", par[0], par[1]," from hbo")
             omdb_data = omdb_search(par[0],par[1])      #search for the movie on the Online Movie DataBase
-            movie = {                                   #scrape data from omdb to suit our purposes
-                'title' = omdb_data.movie['title'],
-                'year' = omdb_data.movie['year'],
-                'description' = omdb_data.movie['plot'],
-                'poster_url' = omdb_data.movie['poster'],
-                'imdb_url' = 'https://www.imdb.com/title/' + omdb_data.movie['imbdID']
-                'imdb_rating' = omdb_data.movie['imdbRating'],
-            }
-            if  not is_title_year_in_db(cnx, cursor, par): #check if (title,year) is not present in the table 'movie'
-            #    add_title_year_to_db(cnx, cursor, )
+            # print(par[0], omdb_data)
+            if omdb_data:
+                movie = {                                   #scrape data from omdb to suit our purposes
+                    'title' : omdb_data.movie['title'],
+                    'year' : omdb_data.movie['year'],
+                    'description' : omdb_data.movie['plot'],
+                    'poster_url' : 'foobar', #omdb_data.movie['poster'],
+                    'imdb_id' : omdb_data.movie['imdbID'],
+                    # 'imdb_rating' : omdb_data.movie['imdbRating'],
+                    'genres' : omdb_data.movie['genre'].split(', ')
+                }
+                if  not is_title_year_in_db(cursor, movie): 
+                                                        #check if (title,year) is not present in the table 'movie'
+                    add_new_movie(cnx, cursor, movie)
                 
-            # if is_hbo_service_available:
-            #         #print('need to add omdb_search')
-            #         continue
-            #     else:
-            #         service_id = get_streamingServiceId(cursor, name) 
-            #         movie_id = get_movieId(cursor, par)
-            #         watch_url = 'https://fi.hbonordic.com/movies/' + par[0].replace(" ","+") + '/' + par[2] #substitute par[0] with the movie with the title from omdb
-            #         add_movie_as_available(cnx, cursor, movie_id, service_id, watch_url)
-                    
+                if not is_hbo_service_available(cursor, movie):
+                    watch_url = 'https://fi.hbonordic.com/movies/' + movie['title'].replace(" ","+") + '/' + par[2]
+                    add_movie_as_available(cnx, cursor, movie, 'hbo', watch_url)
+
+                for genre in movie['genres']:
+                    if not is_genre_in_database(cursor, genre):
+                        print("I got here")
+                        add_new_genre(cnx, cursor, genre)
+                    add_genre_to_movie(cnx, cursor, get_movieId(cursor,movie), get_genreId(cursor, genre))
 
         if content.select('errorCode'):
             flag = False        
