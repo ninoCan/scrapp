@@ -177,11 +177,11 @@ def add_genre_to_movie(cnx, cursor, movie_id, genre_id):
 
 def add_new_genre(cnx, cursor, name):
     """ Add new genre """
-    query = ('INSERT INTO genre '
+    add = ('INSERT INTO genre '
              '(name) '
              'VALUES (%s)')
-    params = (name,)
-    cursor.execute(query, (params))
+    par = (name,)
+    cursor.execute(add, (par))
     result = cursor.lastrowid
     if result != None:
         print("Added new genre to table: ", name)
@@ -192,7 +192,9 @@ def add_new_genre(cnx, cursor, name):
         return False
 
 def get_genreId(cursor, name):
-    """ Get genre id with name"""
+    """
+    Get genre id with name
+    """
     query = ('SELECT genre.id AS "id" '
              'FROM genre WHERE genre.name = %s')
 
@@ -205,11 +207,116 @@ def get_genreId(cursor, name):
     else:
         return False
 
-# def add_hbo_to_steamingService(cnx, cursor, url):
-#     add = ('INSERT INTO streaming_services IF NOT EXISTS '
-#            '(name, scrape_url, type) '
-#            'VALUES (%s,%s)')
-#     pars = ('hbo', url)
-#     cursor.execute(add, (pars))
-#     cnx.commit()
-#     return 
+
+def add_error(cnx, cursor, title, year, service, omdb_data, string):
+    add = ('INSERT INTO scrape_insertion_error '
+           '(scrape_title, year, proposed_imdb_name, omdb_data, information) '
+           'VALUES (%s, %s, %s, %s, %s)'
+    )
+    pars = (title, service, year, omdb_data, string)
+    
+    cursor.execute(add, (pars))
+    result = cursor.lastrowid
+    if result != None:
+        print("Added new error for the title: ", name, year)
+        cnx.commit()
+        return 
+    else:
+        print("FAILED to add error")
+        return False
+
+def is_service_in_database(cursor, name):
+    """
+    Check if reviewer already exists in the reviewer table
+    """
+    query = ('SELECT streaming_service.name '
+             'FROM streaming_service '
+             'WHERE streaming_service.name = %s')
+    par = (name, )
+    cursor.execute(query, (par))
+    result = cursor.fetchall()
+    # check = len(result) != 0
+    # print("Result from genre-check is going to be: ", result, " and the check is going to be: ", check)
+    if len(result) != 0:
+        return True
+    else: 
+        return False
+
+def add_service_to_steamingService(cnx, cursor, service, url, serv_type):
+    add = ('INSERT INTO streaming_service '
+           '(name, scrape_url, type) '
+           'VALUES (%s,%s,%s)')
+    pars = (service, url, serv_type)
+    cursor.execute(add, (pars))
+    cnx.commit()
+    return 
+
+def is_reviewer_in_database(cursor, name):
+    """
+    Check if reviewer already exists in the reviewer table
+    """
+    query = ('SELECT reviewer.name '
+             'FROM reviewer '
+             'WHERE reviewer.name = %s')
+    par = (name, )
+    cursor.execute(query, (par))
+    result = cursor.fetchall()
+    # check = len(result) != 0
+    # print("Result from genre-check is going to be: ", result, " and the check is going to be: ", check)
+    if len(result) != 0:
+        return True
+    else: 
+        return False
+
+def add_new_reviewer(cnx, cursor, name):
+    """
+    Add new reviewer to the reviewer table
+    """
+    add = ('INSERT INTO reviewer '
+             '(name) '
+             'VALUES (%s)')
+    par = (name,)
+    cursor.execute(add, (par))
+    result = cursor.lastrowid
+    if result != None:
+        print("Added new reviewer to table: ", name)
+        cnx.commit()
+        return 
+    else:
+        print("reviewer NOT ADDED")
+        return False
+
+def get_reviewerId(cursor, name):
+    """
+    Get reviewer id with name
+    """
+    query = ('SELECT reviewer.id AS "id" '
+             'FROM reviewer '  
+             'WHERE reviewer.name = %s')
+
+    params = (name,)
+    cursor.execute(query, (params))
+    result = cursor.fetchall()
+    #print("For ", name, " we get ",result)
+    if len(result) != 0:
+        return result.pop()[0]
+    else:
+        return False
+
+def add_score_to_movie(cnx, cursor, score, movie_id, reviewer_id):
+    """ 
+    Link movie to score
+    """
+    add = ('INSERT INTO movie_review '
+             '(rating, movie_id, reviewer_id) '
+             'VALUES (%s, %s, %s)')
+
+    pars = (score, movie_id, genre_id)
+    cursor.execute(add, (pars))
+    result = cursor.lastrowid
+    if result != None:
+        print("Movie has new rating")
+        cnx.commit()
+        return 
+    else:
+        return False
