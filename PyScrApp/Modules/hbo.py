@@ -4,19 +4,19 @@ from .omdb import *
 from bs4 import BeautifulSoup
 import json
 
-def is_hbo_service_available(cursor, movie):
-    query = ('SELECT movie_streaming_service_selection.id AS "rows" '
-             'FROM movie_streaming_service_selection ' 
-             'LEFT JOIN movie '
-             'ON movie.id = movie_streaming_service_selection.movie_id '
-             'WHERE movie.name = %s AND movie.year = %s')
-    pars = (movie['title'], movie['year'])
-    cursor.execute(query, (pars))
-    cursor.fetchall()
-    if cursor.rowcount >= 1:
-        return True
-    else:
-        return False 
+# def is_hbo_service_available(cursor, movie):
+#     query = ('SELECT movie_streaming_service_selection.id AS "rows" '
+#              'FROM movie_streaming_service_selection ' 
+#              'LEFT JOIN movie '
+#              'ON movie.id = movie_streaming_service_selection.movie_id '
+#              'WHERE movie.name = %s AND movie.year = %s')
+#     pars = (movie['title'], movie['year'])
+#     cursor.execute(query, (pars))
+#     cursor.fetchall()
+#     if cursor.rowcount >= 1:
+#         return True
+#     else:
+#         return False 
         
 # def check_if_is_tv_series(movie):
 #     """
@@ -34,10 +34,10 @@ def is_hbo_service_available(cursor, movie):
 
 def hbo_scraper(cnx,cursor):
     """
-    Scraper from hbo_nordic
+    Scraper from HBO NORDIC movies
     """
-   
-    hbo_base = 'https://api-hbon.hbo.clearleap.com/cloffice/client/web/browse/ea73aabd-24a3-473e-8f3a-39aeb7f0f93e?max=20&language=fi_hbon&offset='                    #base page 
+
+    hbo_base = 'https://api-hbon.hbo.clearleap.com/cloffice/client/web/browse/ea73aabd-24a3-473e-8f3a-39aeb7f0f93e?max=20&language=fi_hbon&offset='                    # base page 
     # add_hbo_to_steamingService(cnx, cursor, hbo_base)
     if not is_service_in_database(cursor, 'HBO'):
         add_service_to_steamingService(cnx, cursor, 'HBO', hbo_base, 'xml')
@@ -63,8 +63,9 @@ def hbo_scraper(cnx,cursor):
             failed = False
             omdb_data = omdb_search(par[0],par[1])      #search for the movie on the Online Movie DataBase
             # print(par[0], omdb_data)
-            if failed:
-                    add_error(cnx, cursor, par[0],par[1],'HBO', 'NONE', 'Failed to be found on OMDB!')
+            if failed:                                          #BUG it doesn't get inside this loop
+                    print(par[0],'failed to be found on OMDB!')
+                    add_error(cnx, cursor, par[0], par[1], get_streamingServiceId(cursor, 'HBO'), 'NONE', 'Failed to be found on OMDB!')
                    
             if omdb_data:
                 movie = {                                   #scrape data from omdb to suit our purposes
@@ -85,7 +86,7 @@ def hbo_scraper(cnx,cursor):
                     with open('tv_series_from_hbo.json','a+') as f:
                         json.dump(movie, f)
                         f.write('\n')
-                    add_error(cnx, cursor, movie['title'], movie['year'], 'HBO', json.dumps(omdb_data), 'This is probably a tv series')
+                    add_error(cnx, cursor, movie['title'], movie['year'][:4], get_streamingServiceId(cursor,'HBO'), json.dumps(omdb_data.movie.attrs), 'This is probably a tv series')
                     print("Added to the HBO tv series JSON file!")
                     continue
                 else:
@@ -93,7 +94,8 @@ def hbo_scraper(cnx,cursor):
                                                         #check if (title,year) is not present in the table 'movie'
                         add_new_movie(cnx, cursor, movie)
                 
-                        if not is_hbo_service_available(cursor, movie):
+                        # if not is_hbo_service_available(cursor, movie):
+                        if not is_service_available_for_movie(cursor, get_streamingServiceId('HBO'), movie):
                             watch_url = 'https://fi.hbonordic.com/movies/' + movie['title'].replace(" ","+") + '/' + par[2]
                             add_movie_as_available(cnx, cursor, movie, 'hbo', watch_url)
 

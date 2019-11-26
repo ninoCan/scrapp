@@ -13,7 +13,10 @@ def main():
     cnx, cursor = connect_to_database("database_credential.key")
 
     print('Scraping data from the internet...')
-    hbo_scraper(cnx,cursor)
+    #print("Scraping movies from HBO")
+    #hbo_scraper(cnx,cursor)
+    print("Scraping movies from viaplay")
+    viaplay_scraper(cnx, cursor)
     print('Scraping complete!')
 
     disconnect_database(cnx, cursor)

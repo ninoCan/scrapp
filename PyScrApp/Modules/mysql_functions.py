@@ -208,17 +208,17 @@ def get_genreId(cursor, name):
         return False
 
 
-def add_error(cnx, cursor, title, year, service, omdb_data, string):
+def add_error(cnx, cursor, title, year, service_id, omdb_data, string):
     add = ('INSERT INTO scrape_insertion_error '
-           '(scrape_title, year, proposed_imdb_name, omdb_data, information) '
+           '(scrape_title, year, scrape_service_id, omdb_data, information) '
            'VALUES (%s, %s, %s, %s, %s)'
     )
-    pars = (title, service, year, omdb_data, string)
+    pars = (title, year, service_id, omdb_data, string)
     
     cursor.execute(add, (pars))
     result = cursor.lastrowid
     if result != None:
-        print("Added new error for the title: ", name, year)
+        print("Added new error for the title: ", title, year)
         cnx.commit()
         return 
     else:
@@ -294,8 +294,8 @@ def get_reviewerId(cursor, name):
              'FROM reviewer '  
              'WHERE reviewer.name = %s')
 
-    params = (name,)
-    cursor.execute(query, (params))
+    par = (name,)
+    cursor.execute(query, (par))
     result = cursor.fetchall()
     #print("For ", name, " we get ",result)
     if len(result) != 0:
@@ -311,7 +311,7 @@ def add_score_to_movie(cnx, cursor, score, movie_id, reviewer_id):
              '(rating, movie_id, reviewer_id) '
              'VALUES (%s, %s, %s)')
 
-    pars = (score, movie_id, genre_id)
+    pars = (score, movie_id, reviewer_id)
     cursor.execute(add, (pars))
     result = cursor.lastrowid
     if result != None:
@@ -320,3 +320,17 @@ def add_score_to_movie(cnx, cursor, score, movie_id, reviewer_id):
         return 
     else:
         return False
+
+def is_service_available_for_movie(cursor, service_id, movie):
+    query = ('SELECT movie_streaming_service_selection.id AS "rows" '
+             'FROM movie_streaming_service_selection ' 
+             'LEFT JOIN movie '
+             'ON movie.id = movie_streaming_service_selection.movie_id '
+             'WHERE movie.name = %s AND movie.year = %s AND movie_streaming_service_selection.streaming_service_id = %s')
+    pars = (movie['title'], movie['year'], service_id)
+    cursor.execute(query, (pars))
+    cursor.fetchall()
+    if cursor.rowcount >= 1:
+        return True
+    else:
+        return False 

@@ -18,6 +18,8 @@ def simple_get(url):
                 return ('html', resp.content)
             elif is_good_xml_response(resp):
                 return ('xml', resp.content)
+            elif is_good_json_response(resp):
+                return ('json', resp.content)
             else:
                 return None
 
@@ -37,12 +39,21 @@ def is_good_html_response(resp):
 
 def is_good_xml_response(resp):
     """
-    Returns True if the response seems to be HTML, False otherwise.
+    Returns True if the response seems to be XML, False otherwise.
     """
     content_type = resp.headers['Content-Type'].lower()
     return (resp.status_code == 200 
             and content_type is not None 
             and content_type.find('xml') > -1)
+
+def is_good_json_response(resp):
+    """
+    Returns True if the response seems to be JSON, False otherwise.
+    """
+    content_type = resp.headers['Content-Type'].lower()
+    return (resp.status_code == 200 
+            and content_type is not None 
+            and content_type.find('json') > -1)
 
 def log_error(e):
     """
