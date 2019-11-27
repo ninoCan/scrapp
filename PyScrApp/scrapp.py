@@ -15,8 +15,10 @@ def main():
     print('Scraping data from the internet...')
     #print("Scraping movies from HBO")
     #hbo_scraper(cnx,cursor)
-    print("Scraping movies from viaplay")
-    viaplay_scraper(cnx, cursor)
+    # print("Scraping movies from viaplay")
+    # viaplay_scraper(cnx, cursor)
+    print("Scraping tv series from viaplay")
+    viaplay_series_scraper(cnx, cursor)
     print('Scraping complete!')
 
     disconnect_database(cnx, cursor)

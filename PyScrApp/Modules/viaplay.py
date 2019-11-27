@@ -24,7 +24,7 @@ def viaplay_scraper(cnx, cursor):
     page_lim, counter_lim = viaplay_first_contact(vp_base)
     i=1                                                 #counter to loop through the pages
     
-    for i in range(1,page_lim+1):
+    for i in range(1,page_lim):                         #last page contains less than counter_lim movies, it needs to be treated differently
         url = vp_base + str(i) 
         raw = simple_get(url)                           #get the raw page
         content = json.loads(raw[1])                    #parse the content as a python-json dict 
@@ -33,18 +33,18 @@ def viaplay_scraper(cnx, cursor):
         for j in range(counter_lim):
             vp_movie = content['_embedded']['viaplay:products'][j]
 
-            par = (                                     #extract title and year from the viaplay page
+            pars = (                                     #extract title and year from the viaplay page
                 vp_movie['content']['title'],
                 vp_movie['content']['production']['year'],
                 vp_movie['publicPath']
             )
-            print("Scraped ", par[0], par[1], par[2], " from viaplay")
+            print("Scraped ", pars[0], pars[1], pars[2], " from viaplay")
             
             failed = False
-            omdb_data = omdb_search(par[0],par[1])      #search for the movie on the Online Movie DataBase
+            omdb_data = omdb_search(pars[0],pars[1])      #search for the movie on the Online Movie DataBase
             # print(par[0], omdb_data)
             if failed:                                          #BUG it doesn't get inside this loop
-                    print(par[0],'failed to be found on OMDB!')
+                    print(pars[0],'failed to be found on OMDB!')
                     add_error(cnx, cursor, par[0],par[1], get_streamingServiceId(cursor,'viaplay'), 'NONE', 'Failed to be found on OMDB!')
 
             if omdb_data:
@@ -75,7 +75,7 @@ def viaplay_scraper(cnx, cursor):
                         add_new_movie(cnx, cursor, movie)
 
                     if not is_service_available_for_movie(cursor, get_streamingServiceId(cursor, 'viaplay'), movie):
-                            watch_url = 'https://viaplay.fi/leffat/' +  par[2]
+                            watch_url = 'https://viaplay.fi/leffat/' +  pars[2]
                             add_movie_as_available(cnx, cursor, movie, 'viaplay', watch_url)
 
                     for genre in movie['genres']:
@@ -90,4 +90,201 @@ def viaplay_scraper(cnx, cursor):
                     if not is_reviewer_in_database(cursor, 'metacritic'):
                         add_new_reviewer(cnx, cursor, 'metacritic')
                     add_score_to_movie(cnx, cursor, movie['metacritic_rating'], get_movieId(cursor, movie), get_reviewerId(cursor, 'metacritic'))
+    
+    # implementing last page scraping
+
+    url = vp_base + page_lim 
+    raw = simple_get(url)                           #get the raw page
+    content = json.loads(raw[1])                    #parse the content as a python-json dict 
+
+    
+    for j in range(page_lim % counter_lim):
+        vp_movie = content['_embedded']['viaplay:products'][j]
+
+        par = (                                     #extract title and year from the viaplay page
+            vp_movie['content']['title'],
+            vp_movie['content']['production']['year'],
+            vp_movie['publicPath']
+        )
+        print("Scraped ", par[0], par[1], par[2], " from viaplay")
+        
+        failed = False
+        omdb_data = omdb_search(par[0],par[1])      #search for the movie on the Online Movie DataBase
+        # print(par[0], omdb_data)
+        if failed:                                          #BUG it doesn't get inside this loop
+                print(par[0],'failed to be found on OMDB!')
+                add_error(cnx, cursor, par[0],par[1], get_streamingServiceId(cursor,'viaplay'), 'NONE', 'Failed to be found on OMDB!')
+
+        if omdb_data:
+            movie = {                                   #scrape data from omdb to suit our purposes
+                'title' : omdb_data.movie['title'],
+                'year' : omdb_data.movie['year'],
+                'description' : omdb_data.movie['plot'],
+                'poster_url' : 'nocover.png', #omdb_data.movie['poster'],
+                'imdb_id' : omdb_data.movie['imdbID'],
+                # 'imdb_rating' : omdb_data.movie['imdbRating'],
+                'genres' : omdb_data.movie['genre'].split(', '),
+                'imdb_rating' : omdb_data.movie['imdbRating'],
+                'metacritic_rating' : omdb_data.movie['metascore']
+            }
+
+            if len(movie['year']) > 4:
+                print("This should be a tv series!")
+                with open('tv_series_from_viaplay.json','a+') as f:
+                    json.dump(movie, f)
+                    f.write('\n')
+                add_error(cnx, cursor, movie['title'], movie['year'][:4], get_streamingServiceId(cursor,'viaplay'), json.dumps(omdb_data.movie.attrs), 'This is probably a tv series')
+                print("Added to the viaplay tv series JSON file!")
+                continue
+
+            else:
+                if  not is_title_year_in_db(cursor, movie): 
+                                                    #check if (title,year) is not present in the table 'movie'
+                    add_new_movie(cnx, cursor, movie)
+
+                if not is_service_available_for_movie(cursor, get_streamingServiceId(cursor, 'viaplay'), movie):
+                        watch_url = 'https://viaplay.fi/leffat/' +  par[2]
+                        add_movie_as_available(cnx, cursor, movie, 'viaplay', watch_url)
+
+                for genre in movie['genres']:
+                    if not is_genre_in_database(cursor, genre):
+                        add_new_genre(cnx, cursor, genre)
+                    add_genre_to_movie(cnx, cursor, get_movieId(cursor,movie), get_genreId(cursor, genre))
+
+                if not is_reviewer_in_database(cursor, 'imdb'):
+                    add_new_reviewer(cnx, cursor, 'imdb')
+                add_score_to_movie(cnx, cursor, movie['imdb_rating'], get_movieId(cursor, movie), get_reviewerId(cursor, 'imdb'))
+                    
+                if not is_reviewer_in_database(cursor, 'metacritic'):
+                    add_new_reviewer(cnx, cursor, 'metacritic')
+                add_score_to_movie(cnx, cursor, movie['metacritic_rating'], get_movieId(cursor, movie), get_reviewerId(cursor, 'metacritic'))
     return
+
+## ##################################################### ##
+##                  tv series                            ##
+## ##################################################### ##
+    
+def viaplay_series_scraper(cnx, cursor):
+    """
+    Scraper from VIAPLAY tv series
+
+    """
+
+    vp_base='https://content.viaplay.fi/pcdash-fi/sarjat/kaikki?blockId=0e0111c1a5e0fb362a4aa9115e974409&partial=1&pageNumber='
+
+    if not is_service_in_database(cursor, 'viaplay'):
+        add_service_to_steamingService(cnx, cursor, 'viaplay', vp_base, 'json')
+
+    page_lim, counter_lim = viaplay_first_contact(vp_base)
+    i=1                                                 #counter to loop through the pages
+    
+    for i in range(1,page_lim):                         #last page contains less than counter_lim movies, it needs to be treated differently
+        url = vp_base + str(i) 
+        raw = simple_get(url)                           #get the raw page
+        content = json.loads(raw[1])                    #parse the content as a python-json dict 
+    
+        
+        for j in range(counter_lim):
+            vp_series = content['_embedded']['viaplay:products'][j]
+            
+            pars = (
+                vp_series['content']['series']['title'],
+                vp_series['content']['production']['year'],
+                vp_series['publicPath'],
+                vp_series['content']['series']['seasons']
+            )
+            print("Scraped ", pars[0], pars[1], " from viaplay")
+
+             failed = False
+            omdb_data = omdb_search(par[0],par[1])      #search for the movie on the Online Movie DataBase
+            # print(par[0], omdb_data)
+            if failed:                                          #BUG it doesn't get inside this loop
+                print(par[0],'failed to be found on OMDB!')
+                add_error(cnx, cursor, par[0],par[1], get_streamingServiceId(cursor,'viaplay'), 'NONE', 'Failed to be found on OMDB!')
+
+            if omdb_data:
+                series ={
+                    'title' : omdb_data.movie['title'],
+                    'year' : pars[1],
+                    'description' : omdb_data.movie['plot'],
+                    'poster_url' : 'nocover.png', #omdb_data.movie['poster'],
+                    'imdb_id' : omdb_data.movie['imdbID'],
+                    # 'imdb_rating' : omdb_data.movie['imdbRating'],
+                    'genres' : omdb_data.movie['genre'].split(', '),
+                    'imdb_rating' : omdb_data.movie['imdbRating'],
+                    'seasons' : pars[4]
+                }
+            
+            if  not is_series_in_db(cursor, series): 
+                                                    #check if (title,year) is not present in the table 'movie'
+                add_new_series(cnx, cursor, series)
+
+            if not is_service_available_for_series(cursor, get_streamingServiceId(cursor, 'viaplay'), series):
+                    watch_url = 'https://viaplay.fi/sarjat/' +  par[2]
+                    add_series_as_available(cnx, cursor, series, 'viaplay', watch_url)
+
+            for genre in series['genres']:
+                if not is_genre_in_database(cursor, genre):
+                    add_new_genre(cnx, cursor, genre)
+                add_genre_to_series(cnx, cursor, get_seriesId(cursor,series), get_genreId(cursor, genre))
+
+            if not is_reviewer_in_database(cursor, 'imdb'):
+                add_new_reviewer(cnx, cursor, 'imdb')
+            add_score_to_series(cnx, cursor, series['imdb_rating'], get_seriesId(cursor, series), get_reviewerId(cursor, 'imdb'))
+
+    # implementing last page scraping
+
+    url = vp_base + page_lim 
+    raw = simple_get(url)                           #get the raw page
+    content = json.loads(raw[1])                    #parse the content as a python-json dict                 
+    
+    for j in range(counter_lim):
+        vp_series = content['_embedded']['viaplay:products'][j]
+        
+        pars = (
+            vp_series['content']['series']['title'],
+            vp_series['content']['production']['year'],
+            vp_series['publicPath'],
+            vp_series['content']['series']['seasons']
+        )
+        print("Scraped ", pars[0], pars[1], " from viaplay")
+
+            failed = False
+        omdb_data = omdb_search(par[0],par[1])      #search for the movie on the Online Movie DataBase
+        # print(par[0], omdb_data)
+        if failed:                                          #BUG it doesn't get inside this loop
+            print(par[0],'failed to be found on OMDB!')
+            add_error(cnx, cursor, par[0],par[1], get_streamingServiceId(cursor,'viaplay'), 'NONE', 'Failed to be found on OMDB!')
+
+        if omdb_data:
+            series ={
+                'title' : omdb_data.movie['title'],
+                'year' : pars[1],
+                'description' : omdb_data.movie['plot'],
+                'poster_url' : 'nocover.png', #omdb_data.movie['poster'],
+                'imdb_id' : omdb_data.movie['imdbID'],
+                # 'imdb_rating' : omdb_data.movie['imdbRating'],
+                'genres' : omdb_data.movie['genre'].split(', '),
+                'imdb_rating' : omdb_data.movie['imdbRating'],
+                'seasons' : pars[4]
+            }
+        
+        if  not is_series_in_db(cursor, series): 
+                                                #check if (title,year) is not present in the table 'movie'
+            add_new_series(cnx, cursor, series)
+
+        if not is_service_available_for_series(cursor, get_streamingServiceId(cursor, 'viaplay'), series):
+                watch_url = 'https://viaplay.fi/sarjat/' +  par[2]
+                add_series_as_available(cnx, cursor, series, 'viaplay', watch_url)
+
+        for genre in series['genres']:
+            if not is_genre_in_database(cursor, genre):
+                add_new_genre(cnx, cursor, genre)
+            add_genre_to_series(cnx, cursor, get_seriesId(cursor,series), get_genreId(cursor, genre))
+
+        if not is_reviewer_in_database(cursor, 'imdb'):
+            add_new_reviewer(cnx, cursor, 'imdb')
+        add_score_to_series(cnx, cursor, series['imdb_rating'], get_seriesId(cursor, series), get_reviewerId(cursor, 'imdb'))
+    
+    return
+

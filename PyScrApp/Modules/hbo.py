@@ -116,3 +116,31 @@ def hbo_scraper(cnx,cursor):
         if content.select('errorCode'):
             flag = False        
     return
+
+## ##################################################### ##
+##                  tv series                            ##
+## ##################################################### ##
+
+
+# def hbo_series_scraper(cnx, cursor):
+
+#     hbo_base = 'https://api-hbon.hbo.clearleap.com/cloffice/client/web/browse/f5dde064-495d-41dc-8cd7-cbb76baaf8d0?max=20&language=fi_hbon&offset='
+
+#      i=0                                                 #counter to loop through the page
+#     flag = True                                         #flag to control the page scraper loop
+
+#     while flag:
+#         url = hbo_base + str(i) 
+#         raw = simple_get(url)                           #get the raw page
+#         content = BeautifulSoup(raw[1], "lxml-"+raw[0]) #parse the content with BS        
+#         i += 20                                         #moves the counter to next page
+
+#         for elem in content.select('item'):             #cycles the <item> elements in the page
+                   
+#             par = (                                     #extract title and year from an item of the page
+#                 elem.select('title').pop().text,            
+#                 elem.find('media:credit', role = "year").text, 
+#                 elem.find('guid').text
+#             )
+#             print("Scraped tv series title: ", par[0], par[1]," from hbo")
+#             failed = False

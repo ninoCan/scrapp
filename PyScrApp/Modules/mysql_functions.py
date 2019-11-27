@@ -334,3 +334,119 @@ def is_service_available_for_movie(cursor, service_id, movie):
         return True
     else:
         return False 
+
+
+## ##################################################### ##
+##                  tv series                            ##
+## ##################################################### ##
+
+
+def is_series_in_db(cursor, series):
+    """
+    Checks if the tv series is already in the database
+    """
+    query = "SELECT tv_series.name FROM tv_series WHERE tv_series.name = %s AND tv_series.year = %s"
+    pars = (series['title'], series['year'])
+    cursor.execute(query,(pars))
+    cursor.fetchall()
+    if cursor.rowcount > 0 :
+        return True
+    else:
+        return False
+
+def add_new_series(cnx, cursor, series):
+    """ Insert a new tv series """
+    add = ('INSERT INTO tv_series '
+            # '(name, description, year, poster_url, imdb_url) '
+             '(name, description, year, poster, imdb_id) '
+             'VALUES (%s, %s, %s, %s, %s)')
+    pars = (series['title'], series['description'], series['year'], series['poster_url'], series['imdb_id'])
+    result = cursor.execute(add, (pars))
+    if result != None:
+        print("New series:",series['title'] + ' (' + series['year'] + ') inserted')
+        cnx.commit()
+        return 
+    else:
+        return #print result.id to error_table
+
+def is_service_available_for_series(cursor, service_id, movie):
+    """
+    check if the streaming service is already available for the tv series
+    """
+    query = ('SELECT tv_series_streaming_service_selection.id AS "rows" '
+             'FROM tv_series_streaming_service_selection ' 
+             'LEFT JOIN tv_series '
+             'ON tv_series.id = tv_series_streaming_service_selection.tv_series_id '
+             'WHERE tv_series.name = %s AND tv_series.year = %s '
+             'AND tv_series_streaming_service_selection.streaming_service_id = %s')
+    pars = (movie['title'], movie['year'], service_id)
+    cursor.execute(query, (pars))
+    cursor.fetchall()
+    if cursor.rowcount >= 1:
+        return True
+    else:
+        return False 
+
+def add_series_as_available(cnx, cursor, movie, service, url):
+    """ Add series to be available on given streaming service """
+    add_service = ('INSERT INTO tv_series_streaming_service_selection '
+                   '(tv_series_id, streaming_service_id, url) '
+                   'VALUES (%s, %s, %s)')
+
+    pars = (get_seriesId(cursor, movie), get_streamingServiceId(cursor, service), url)
+    cursor.execute(add_service, (pars))
+    result = cursor.lastrowid
+    if result != None:
+        cnx.commit()
+        print(service + ' streaming available for the series ' +movie['title'])
+        return 
+    else:
+        return False
+
+def get_seriesId(cursor, movie):
+    """ Get series id with name and year """
+    query = ('SELECT tv_series.id AS "id" '
+             'FROM tv_series '
+             'WHERE tv_series.name = %s AND tv_series.year = %s')
+    pars = (movie['title'], movie['year'])
+    
+    cursor.execute(query, (pars))
+    result = cursor.fetchall()
+    if result != None:
+        return result.pop()[0]
+    else:
+        return None
+
+def add_genre_to_series(cnx, cursor, movie_id, genre_id):
+    """ Link tv series to genre """
+    add = ('INSERT INTO tv_series_genre '
+             '(tv_series_id, genre_id) '
+             'VALUES (%s, %s)')
+
+    pars = (movie_id, genre_id)
+    cursor.execute(add, (pars))
+    result = cursor.lastrowid
+    if result != None:
+        print("Tv series has new genre")
+        cnx.commit()
+        return 
+    else:
+        return False
+
+def add_score_to_series(cnx, cursor, score, movie_id, reviewer_id):
+    """ 
+    Link movie to tv series
+    """
+    add = ('INSERT INTO tv_series_review '
+             '(rating, tv_series_id, reviewer_id) '
+             'VALUES (%s, %s, %s)')
+
+    pars = (score, movie_id, reviewer_id)
+    cursor.execute(add, (pars))
+    result = cursor.lastrowid
+    if result != None:
+        print("Tv series has new rating")
+        cnx.commit()
+        return 
+    else:
+        return False
