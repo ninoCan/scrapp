@@ -35,6 +35,7 @@ Moreover, the scraper will depend on the following standard libraries:
  - time
  - json
  - contextlib
+ - hashlib
  these should already come with the basic python installation, but in case the program is not running make sure that are installed.
 ##The scraper
 

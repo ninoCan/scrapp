@@ -19,7 +19,7 @@ def viaplay_scraper(cnx, cursor):
     vp_base='https://content.viaplay.fi/pcdash-fi/leffat/kaikki?blockId=20822ace006b61ea5811662ab365729e&partial=1&sort=alphabetically&pageNumber='
 
     if not is_service_in_database(cursor, 'viaplay'):
-        add_service_to_steamingService(cnx, cursor, 'viaplay', vp_base, 'json')
+        add_service_to_steamingService(cnx, cursor, 'viaplay', 'json')
 
     page_lim, counter_lim = viaplay_first_contact(vp_base)
     i=1                                                 #counter to loop through the pages
@@ -59,6 +59,8 @@ def viaplay_scraper(cnx, cursor):
                     'imdb_rating' : omdb_data.movie['imdbRating'],
                     'metacritic_rating' : omdb_data.movie['metascore']
                 }
+                
+                movie['poster_url'] =  omdb_poster(movie) + '.png'
 
                 if len(movie['year']) > 4:
                     print("This should be a tv series!")
@@ -173,7 +175,11 @@ def viaplay_series_scraper(cnx, cursor):
     vp_base='https://content.viaplay.fi/pcdash-fi/sarjat/kaikki?blockId=0e0111c1a5e0fb362a4aa9115e974409&partial=1&pageNumber='
 
     if not is_service_in_database(cursor, 'viaplay'):
-        add_service_to_steamingService(cnx, cursor, 'viaplay', vp_base, 'json')
+        scrape_data = {
+            'type' : 'json',
+            'movie_scrape_url' : vp_base
+        }
+        add_service_to_steamingService(cnx, cursor, 'viaplay', json.dumps(scrape_data))
 
     page_lim, counter_lim = viaplay_first_contact(vp_base)
     i=1                                                 #counter to loop through the pages
@@ -195,7 +201,7 @@ def viaplay_series_scraper(cnx, cursor):
             )
             print("Scraped ", pars[0], pars[1], " from viaplay")
 
-             failed = False
+            failed = False
             omdb_data = omdb_search(par[0],par[1])      #search for the movie on the Online Movie DataBase
             # print(par[0], omdb_data)
             if failed:                                          #BUG it doesn't get inside this loop
@@ -249,7 +255,7 @@ def viaplay_series_scraper(cnx, cursor):
         )
         print("Scraped ", pars[0], pars[1], " from viaplay")
 
-            failed = False
+        failed = False
         omdb_data = omdb_search(par[0],par[1])      #search for the movie on the Online Movie DataBase
         # print(par[0], omdb_data)
         if failed:                                          #BUG it doesn't get inside this loop

@@ -125,7 +125,7 @@ def hbo_scraper(cnx,cursor):
 # def hbo_series_scraper(cnx, cursor):
 
 #     hbo_base = 'https://api-hbon.hbo.clearleap.com/cloffice/client/web/browse/f5dde064-495d-41dc-8cd7-cbb76baaf8d0?max=20&language=fi_hbon&offset='
-
+    
 #      i=0                                                 #counter to loop through the page
 #     flag = True                                         #flag to control the page scraper loop
 

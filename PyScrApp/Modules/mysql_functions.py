@@ -242,11 +242,11 @@ def is_service_in_database(cursor, name):
     else: 
         return False
 
-def add_service_to_steamingService(cnx, cursor, service, url, serv_type):
+def add_service_to_steamingService(cnx, cursor, service, json):
     add = ('INSERT INTO streaming_service '
-           '(name, scrape_url, type) '
-           'VALUES (%s,%s,%s)')
-    pars = (service, url, serv_type)
+           '(name, scrape_data) '
+           'VALUES (%s,%s)')
+    pars = (service, json)
     cursor.execute(add, (pars))
     cnx.commit()
     return 

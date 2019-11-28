@@ -2,6 +2,7 @@ from .requests_soup import *
 from .mysql_functions import *
 from bs4 import BeautifulSoup
 import time 
+from hashlib import sha1
 
 def omdb_search(title,year):
     #reads the key for the api and store it in the variable key
@@ -53,3 +54,23 @@ def shrink_title(title):
     new_title = title.rstrip(last_word).rstrip().rstrip("'")
 
     return new_title
+
+
+def omdb_poster(movie):
+    """ Save the poster image to folder ./Posters
+    """
+    with open('api.key','r') as f:
+        key = f.read().replace('\n','')
+
+    url = 'http://img.omdbapi.com/?apikey=' + key + '&i=' + movie['imdb_id'] + '&h=300'
+    with get(url, stream= True) as resp:
+    
+        name = movie['title'] + movie['year']
+        hasher = sha1(name.encode('utf-8'))
+
+        path_to_poster='./Posters/'+hasher.hexdigest()+'.png'
+
+        with open(path_to_poster,'wb') as f:
+            f.write(resp.content)
+  
+    return hasher.hexdigest()

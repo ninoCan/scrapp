@@ -20,6 +20,8 @@ def simple_get(url):
                 return ('xml', resp.content)
             elif is_good_json_response(resp):
                 return ('json', resp.content)
+            elif is_good_jpg_response(resp):
+                return ('jpg', resp.content)                
             else:
                 return None
 
@@ -45,6 +47,15 @@ def is_good_xml_response(resp):
     return (resp.status_code == 200 
             and content_type is not None 
             and content_type.find('xml') > -1)
+
+def is_good_jpg_response(resp):
+    """
+    Returns True if the response seems to be JPG, False otherwise.
+    """
+    content_type = resp.headers['Content-Type'].lower()
+    return (resp.status_code == 200 
+            and content_type is not None 
+            and content_type.find('jpg') > -1)
 
 def is_good_json_response(resp):
     """
