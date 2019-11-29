@@ -7,8 +7,7 @@ from contextlib import closing
 #function definitions
 
 def simple_get(url):
-    """
-    Attempts to get the content at `url` by making an HTTP GET request.
+    """ Attempts to get the content at `url` by making an HTTP GET request.
     If the content-type of response is some kind of HTML/XML, return the
     text content, otherwise return None.
     """
@@ -31,8 +30,7 @@ def simple_get(url):
 
 
 def is_good_html_response(resp):
-    """
-    Returns True if the response seems to be HTML, False otherwise.
+    """ Returns True if the response seems to be HTML, False otherwise.
     """
     content_type = resp.headers['Content-Type'].lower()
     return (resp.status_code == 200 
@@ -40,8 +38,7 @@ def is_good_html_response(resp):
             and content_type.find('html') > -1)
 
 def is_good_xml_response(resp):
-    """
-    Returns True if the response seems to be XML, False otherwise.
+    """ Returns True if the response seems to be XML, False otherwise.
     """
     content_type = resp.headers['Content-Type'].lower()
     return (resp.status_code == 200 
@@ -49,8 +46,7 @@ def is_good_xml_response(resp):
             and content_type.find('xml') > -1)
 
 def is_good_jpg_response(resp):
-    """
-    Returns True if the response seems to be JPG, False otherwise.
+    """ Returns True if the response seems to be JPG, False otherwise.
     """
     content_type = resp.headers['Content-Type'].lower()
     return (resp.status_code == 200 
@@ -58,8 +54,7 @@ def is_good_jpg_response(resp):
             and content_type.find('jpg') > -1)
 
 def is_good_json_response(resp):
-    """
-    Returns True if the response seems to be JSON, False otherwise.
+    """ Returns True if the response seems to be JSON, False otherwise.
     """
     content_type = resp.headers['Content-Type'].lower()
     return (resp.status_code == 200 
@@ -67,8 +62,7 @@ def is_good_json_response(resp):
             and content_type.find('json') > -1)
 
 def log_error(e):
-    """
-    It is always a good idea to log errors. 
+    """ It is always a good idea to log errors. 
     This function just prints them, but you can
     make it do anything.
     """
