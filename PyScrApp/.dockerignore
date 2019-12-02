@@ -1,0 +1,12 @@
+# files ingnored in building phase
+.git*
+env
+.ipynb_checkpoints
+__pycache__
+python-virtual-environments
+.vscode
+foo*
+*.md
+Posters
+.data
+tv_series*
