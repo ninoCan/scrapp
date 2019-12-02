@@ -9,6 +9,8 @@ def main():
     """ This is going to connect to mysql database and scrape data from the various services
     """
     
+
+    
     cnx, cursor = connect_to_database("database_credential.key")
 
     print('Scraping data from the internet...')
