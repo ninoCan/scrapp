@@ -81,3 +81,48 @@ To copy it outside of the container run the following comman:
       $ docker cp <container-name>:/var/run/mysqld/<database-record>.sql <path/to/folder/on/local/machine>
 
 This could be useful to make a backup of the database.
+
+## Shipping ScrApp to container
+
+To build the container for the python3 app we are going to touch two files: a `Dockerfile` and a `.dockerignore`. 
+In the latter, we are going to add every file of the folder but the `scrapp.py` and the `Modules` folder which contains the functions needed for the main program. 
+
+The Dockerfile contains the followed content:
+```
+### Dockerfile for ScrApp.py
+# base for the container
+FROM python:3.8-alpine
+
+# metadata
+LABEL author="ninocan" maintainer="ninocangialosi@yahoo.it" 
+
+# import the project files and move to the folder
+# where they are located in the container
+COPY . /app
+WORKDIR /app
+RUN mkdir Posters
+
+# needed to avoid errors when installing lxml library
+RUN apk add --update --no-cache g++ gcc libxslt-dev
+# install dependencies
+RUN pip install -r requirements.txt
+
+#open port for connection
+EXPOSE 5000
+
+#launch the application
+CMD ["python", "./scrapp.py"]
+
+```
+Let's comment on their function:
+| COMMAND                | FUNCTION                                             | COMMENTS                                                                                                                                                                                                                         |
+|------------------------|------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| FROM python:3.8-alpine | Fetches the base image from the dockerhub            | This should be the lightest base for python3.8, the package manager of alpine is `apk`                                                                                                                                           |
+| LABEL  ...             | This includes metadata of the produced image         | We are just listing the author and the email for convinience                                                                                                                                                                     |
+| COPY . app/            | Copies the files from locale to container            | Thanks to the dockerignore file we are only including the files of interest                                                                                                                                                      |
+| WORKDIR /app           | Moves inside the folder of the application           | The container acts as independent filesystem, here is where we do the dirty job                                                                                                                                                  |
+| RUN mkdir Posters      | Creates a new folder inside `/app`                   | We are not including Poster to the repo so we need to create it for the app to work properly                                                                                                                                     |
+| RUN apk ...            | Installs g++ gcc libxslt-dev                         | First version of the dockerfile did not have this line and the building failed when installing lxml. This line fixes it. Source:  [stackoverflow](https://stackoverflow.com/questions/35931579/how-can-i-install-lxml-in-docker) |
+| RUN pip install ...    | Installs the python dependencies for the application | This requires the creation of a `requirements.txt` file. Details below                                                                                                                                                           |
+| EXPOSE 5000            | open port for external connection                    | Maybe not needed                                                                                                                                                                                                                 |
+| CMD ...                | Launches the app                                   |                                                                                                                                                                                                                                  |

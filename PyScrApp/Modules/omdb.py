@@ -132,7 +132,7 @@ def omdb_search_without_year(title):
             return content
         else:
             if len(shrink_title(title).split()) > 1:
-                omdb_search(shrink_title(title), year)
+                omdb_search_without_year(shrink_title(title))
             else:
                 print("NEED TO ADD ERROR TO THE TABLE for ", title, year)
                 global failed

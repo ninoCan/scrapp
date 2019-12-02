@@ -11,7 +11,7 @@ def connect_to_database(file):
     cnx = mysql.connector.connect(user=cred[0], password=cred[1], host=cred[2], database=cred[3])
     print("initializing the cursor to the database")
     cursor =  cnx.cursor(buffered=True)
-
+    
     return cnx, cursor
 
 def disconnect_database(cnx, cursor):

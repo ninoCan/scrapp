@@ -16,9 +16,9 @@ scrape_data = {
 def viaplay_first_contact(base):
     """ Contact the viaplay to get the number of pages and how many elements are contained in a single page
     """
-        raw = simple_get(base + '1')                              #get the raw page
-        content = json.loads(raw[1])                              #parse the content as a python-json dict 
-        return (content['pageCount'], content['productsPerPage'])#return the numbers of pages and product/page
+    raw = simple_get(base + '1')                              #get the raw page
+    content = json.loads(raw[1])                              #parse the content as a python-json dict 
+    return (content['pageCount'], content['productsPerPage'])#return the numbers of pages and product/page
 
 def viaplay_scraper(cnx, cursor):
     """ Scraper from VIAPLAY movies

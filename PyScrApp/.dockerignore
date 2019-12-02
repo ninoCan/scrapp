@@ -10,3 +10,5 @@ foo*
 Posters
 .data
 tv_series*
+Dockerfile
+.dockerignore
