@@ -135,7 +135,7 @@ def omdb_search_without_year(title):
                 omdb_search_without_year(shrink_title(title))
             else:
                 print("NEED TO ADD ERROR TO THE TABLE for ", title, year)
-                global failed
+                nonlocal failed
                 failed = True
                 return False
         ################ end of modification

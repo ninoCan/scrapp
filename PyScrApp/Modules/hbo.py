@@ -168,10 +168,14 @@ def hbo_series_scraper(cnx, cursor):
             # print(par[0], omdb_data)
             if failed:                                          #BUG it doesn't get inside this loop
                     print(par[0],'failed to be found on OMDB!')
-                    add_error(cnx, cursor, par[0], par[1], get_streamingServiceId(cursor, 'HBO'), 'NONE', 'Failed to be found on OMDB!')
-                   
+                    add_error(cnx, cursor,
+                                par[0], par[1], 
+                                    get_streamingServiceId(cursor, 'HBO'),
+                                        'NONE', 'Failed to be found on OMDB!'
+                             )
+
             # if omdb_data:
-            #     movie = {                                   #scrape data from omdb to suit our purposes
+            #     movie = {#scrape data from omdb to suit our purposes
             #         'title' : omdb_data.movie['title'],
             #         'year' : omdb_data.movie['year'],
             #         'description' : omdb_data.movie['plot'],
@@ -183,6 +187,6 @@ def hbo_series_scraper(cnx, cursor):
             #         'metacritic_rating' : omdb_data.movie['metascore']
             #     }
 
-            #     movie['poster_url'] =  omdb_poster(movie) + '.jpg'                
+            #     movie['poster_url'] =  omdb_poster(movie) + '.jpg'
 
-    return 
+    return
