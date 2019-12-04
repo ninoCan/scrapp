@@ -12,7 +12,7 @@ WORKDIR /app
 RUN mkdir Posters
 
 # needed to avoid errors when installing lxml library
-RUN apk add --update --no-cache g++ gcc libxslt-dev
+RUN apk add --update --no-cache gcc libxslt-dev g++ 
 # install dependencies
 RUN pip install -r requirements.txt
 

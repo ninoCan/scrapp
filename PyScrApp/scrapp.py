@@ -1,9 +1,9 @@
-#loading package dependencies
+# loading package dependencies
 from Modules.hbo import *
 from Modules.mysql_functions import *
 from Modules.requests_soup import *
 from Modules.viaplay import *
-import mysql.connector
+
 
 def main():
     """ This is going to connect to mysql database and scrape data from the various services
