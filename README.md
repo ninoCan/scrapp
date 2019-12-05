@@ -32,3 +32,5 @@ To keep the file neater, I will add verbose comments here:
 1. The "$" is a standard name for the [HTML
 DOM](https://www.w3schools.com/js/js_htmldom.asp ) variables. Read more
 at [What is the meaning of “$” sign in JavaScript](https://stackoverflow.com/questions/1150381/what-is-the-meaning-of-sign-in-javascript#1150402 )
+
+**I DISCONTINUED THE NODEJS CODE. PROJECT NOW USES PYTHON INSTEAD. SOURCE IS FOUND IN THE `PyScrApp` FOLDER**
