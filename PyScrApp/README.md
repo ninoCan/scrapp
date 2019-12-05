@@ -10,7 +10,7 @@ Let's initailaize the virtual environment with:
 
 So to create an isolated dependency for the project we need to activate it through:
 
-   $ source env/bin/activate
+      $ source env/bin/activate
 
 This could be later deactivated simply by running `$ deactivate`.
 
@@ -18,14 +18,14 @@ This could be later deactivated simply by running `$ deactivate`.
 [**Source**](https://realpython.com/python-web-scraping-practical-introduction )
 We are going to use the `request` and `BeautifulSoup` packages which we can now install inside the venv with:
 
-   $ pip install requests BeautifulSoup4
+      $ pip install requests BeautifulSoup4
 
 Following the [BeatifulSoup documentation](https://www.crummy.com/software/BeautifulSoup/bs4/doc/#id16 ), the best way to use it is through the use of a third party parser: [lxml](https://lxml.de ). Let us install it, as well:
 
-   $ pip install lxml
+      $ pip install lxml
 In order to communicate with the MySQL server we also need to install a [mysql/python connector](https://dev.mysql.com/doc/connector-python/en/connector-python-introduction.html )
 
-   $ pip install mysql-connector-python
+      $ pip install mysql-connector-python
 To sum up the extra dependencies needed are:
  * requests
  * BeatifulSoup4
@@ -37,7 +37,8 @@ Moreover, the scraper will depend on the following standard libraries:
  - contextlib
  - hashlib
  these should already come with the basic python installation, but in case the program is not running make sure that are installed.
-##The scraper
+ 
+## The scraper
 
 The name of the scraper is  `scrApp.py`, it depends on files from the `./Modules` folder, which are definitions of functions arrenged in such a way to keep everything neater. These files are found in the repo.
 
