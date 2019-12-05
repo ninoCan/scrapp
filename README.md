@@ -1,3 +1,4 @@
+**I DISCONTINUED THE NODEJS CODE. PROJECT NOW USES PYTHON INSTEAD. SOURCE IS FOUND IN THE `PyScrApp` FOLDER**
 # Webscraper scrApp
 
 I am going to follow these tutorials:
