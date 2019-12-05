@@ -56,10 +56,10 @@ Then,touch a text file named `database_credential.key` with the following struct
 ```
 I chose to create a Docker container to run the MySQL database on it, this has been created with the following command:
 
-  $ docker run -p 3306:3306 -d --rm  --name <container-name> -e MYSQL_USER=<database-user-name> -e MYSQL_ROOT_PASSWORD=<database-root-password> -e MYSQL_DATABASE=<database-name> -e MYSQL_PASSWORD=<database-user-password> -v $(pwd)/.data:/var/lib/mysql mysql:5.7
+      $ docker run -p 3306:3306 -d --rm  --name <container-name> -e MYSQL_USER=<database-user-name> -e MYSQL_ROOT_PASSWORD=<database-root-password> -e MYSQL_DATABASE=<database-name> -e MYSQL_PASSWORD=<database-user-password> -v $(pwd)/.data:/var/lib/mysql mysql:5.7
 The flags has the following meaning
 
-       TO BE DONE
+      TO BE DONE
 
 In this way the container run on its own isolated environment and it is easy to fire it up or tear it down. Make sure that the fields in the last command match with the digits in the creditial file.
 
