@@ -115,6 +115,7 @@ CMD ["python", "./scrapp.py"]
 
 ```
 Let's comment on their function:
+
 | COMMAND                | FUNCTION                                             | COMMENTS                                                                                                                                                                                                                         |
 |------------------------|------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | FROM python:3.8-alpine | Fetches the base image from the dockerhub            | This should be the lightest base for python3.8, the package manager of alpine is `apk`                                                                                                                                           |
