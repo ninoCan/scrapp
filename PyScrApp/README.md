@@ -48,12 +48,12 @@ For this purpose, create a file called `api.key` in which you need to insert the
 > S0m3NumB3R54nDd1git5
 
 Then,touch a text file named `database_credential.key` with the following structure:
-
-> <database-user-name>
-> <database-user-password>
-> <host-address>
-> <database-name>
-
+```
+<database-user-name>
+<database-user-password>
+<host-address>
+<database-name>
+```
 I chose to create a Docker container to run the MySQL database on it, this has been created with the following command:
 
   $ docker run -p 3306:3306 -d --rm  --name <container-name> -e MYSQL_USER=<database-user-name> -e MYSQL_ROOT_PASSWORD=<database-root-password> -e MYSQL_DATABASE=<database-name> -e MYSQL_PASSWORD=<database-user-password> -v $(pwd)/.data:/var/lib/mysql mysql:5.7
