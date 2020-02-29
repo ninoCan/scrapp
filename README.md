@@ -27,17 +27,20 @@ In order to communicate with the MySQL server we also need to install a [mysql/p
 
       $ pip install mysql-connector-python
 To sum up the extra dependencies needed are:
+
  * requests
  * BeatifulSoup4
  * lxml
  * mysql-connector-python
+
 Moreover, the scraper will depend on the following standard libraries:
  - time
  - json
  - contextlib
  - hashlib
- these should already come with the basic python installation, but in case the program is not running make sure that are installed.
- 
+
+these should already come with the basic python installation, but in case the program is not running make sure that are installed.
+
 ## The scraper
 
 The name of the scraper is  `scrApp.py`, it depends on files from the `./Modules` folder, which are definitions of functions arrenged in such a way to keep everything neater. These files are found in the repo.
@@ -73,7 +76,7 @@ In this way the container run on its own isolated environment and it is easy to 
 
 If you decide to use the mysql database on your local machine, then the <host-address> field in the credential file should be simply "localhost" eventually followed by the port. However, if you choose to proceed with the container road instead, in order to retrieve the correct address run the following:
 
-    $ docker inspect <container-name> 
+    $ docker inspect <container-name>
 and, then, by looking at the "IPAddress" entry.
 
 
@@ -93,8 +96,8 @@ This could be useful to make a backup of the database.
 
 ## Shipping ScrApp to container
 
-To build the container for the python3 app we are going to touch two files: a `Dockerfile` and a `.dockerignore`. 
-In the latter, we are going to add every file of the folder but the `scrapp.py` and the `Modules` folder which contains the functions needed for the main program. 
+To build the container for the python3 app we are going to touch two files: a `Dockerfile` and a `.dockerignore`.
+In the latter, we are going to add every file of the folder but the `scrapp.py` and the `Modules` folder which contains the functions needed for the main program.
 
 The Dockerfile contains the followed content:
 ```
@@ -103,7 +106,7 @@ The Dockerfile contains the followed content:
 FROM python:3.8-alpine
 
 # metadata
-LABEL author="ninocan" maintainer="ninocangialosi@yahoo.it" 
+LABEL author="ninocan" maintainer="ninocangialosi@yahoo.it"
 
 # import the project files and move to the folder
 # where they are located in the container
